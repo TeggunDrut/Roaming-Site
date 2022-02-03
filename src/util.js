@@ -11,3 +11,16 @@ consoleLog = (text) => {
   document.body.appendChild(text2);
 
 }
+
+function wait(seconds) {
+  let i = 0;
+  setTimeout(()=>{
+    i++;
+
+    if(i == 1) {
+      i = 0;
+    }
+    return true;
+  }, 1000);
+  i = 0;
+} 

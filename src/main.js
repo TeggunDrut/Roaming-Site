@@ -1,5 +1,15 @@
 gcanv.width = window.innerWidth;
 gcanv.height = window.innerHeight;
+window.onresize = () => {
+  gcanv.width = window.innerWidth;
+  gcanv.height = window.innerHeight;
+
+  game.width = window.innerWidth;
+  game.height = window.innerHeight;
+
+  console.log(game.width, game.height);
+}
+
 mainmenuBtnPlay.onclick = () => {
   startGame();
   // if (fadeOut(1)) {

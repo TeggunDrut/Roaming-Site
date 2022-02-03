@@ -4,7 +4,7 @@ html, body {
   margin: 0;
   overflow: hidden;
   background-color: rgb(24, 24, 34);
-  
+  color: white;
 }
 .container {
   position: absolute;

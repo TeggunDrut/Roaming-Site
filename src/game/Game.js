@@ -10,6 +10,7 @@ function init() {
     });
   }
 }
+
 function loop() {
   if (document.getElementById("fadeDiv").childElementCount < 1)
     document.getElementById("fadeDiv").style.display = "none";
@@ -62,22 +63,33 @@ function startGame() {
   // fadeDiv.removeChild(div);
   setInterval(gameLoop, 1);
 }
+var lastCalledTime;
+var fps;
 function gameLoop() {
+  if (!lastCalledTime) {
+    lastCalledTime = Date.now();
+    fps = 0;
+    return;
+  }
+  delta = (Date.now() - lastCalledTime) / 1000;
+  lastCalledTime = Date.now();
+  fps = 1 / delta;
+
   // draw background
   ctx.clearRect(0, 0, game.width, game.height);
   ctx.fillStyle = "rgba(90, 90, 90, 0.6)";
-  ctx.fillRect(0, 0, width, height);
+  ctx.fillRect(0, 0, game.width, game.height);
   // draw grid
   ctx.beginPath();
   ctx.strokeStyle = "rgba(95, 95, 95, 0.9)";
-  for (let xOff = 0; xOff < width; xOff += 70) {
+  for (let xOff = 0; xOff < game.width; xOff += 70) {
     ctx.moveTo(xOff, 0);
-    ctx.lineTo(xOff, height);
+    ctx.lineTo(xOff, game.height);
     ctx.stroke();
   }
-  for (let yOff = 0; yOff < height; yOff += 70) {
+  for (let yOff = 0; yOff < game.height; yOff += 70) {
     ctx.moveTo(0, yOff);
-    ctx.lineTo(width, yOff);
+    ctx.lineTo(game.width, yOff);
     ctx.stroke();
   }
   ctx.stroke();
@@ -85,7 +97,48 @@ function gameLoop() {
   // player update
   player.update();
 
+  ctx.font = "30px Arial";
+  ctx.fillStyle = "white";
+  ctx.fillText("FPS: " + Math.floor(fps), 10, 30);
+
+  // let i = 0;
+  // setInterval(() => {
+  //   i++;
+  //   if (i != 2 && firing == false) {
+
+  //     firing = true;
+  //   }
+  // }, player.rpm)
+  // return false;
+  // if (wait(1)) {
+  //   player.shoot(mouseX, mouseY);
+  //   alert(1);
+  // }
   enemyList.forEach((e) => {
     e.update();
   });
+  if (roundsStarted) {
+    startRounds();
+    roundsStarted = false;
+  }
+}
+
+let enemies = [];
+function spawnWave() {
+  spawnPoints.forEach((s) => {
+    let enemy = new Enemy(s.x, s.y, 60, 60, "blue", 200, false, 1, 100);
+    enemies.push(enemy);
+    for (e of enemies) {
+      enemyList.push(e);
+    }
+    enemies = [];
+    roundNumber++;
+  });
+}
+let l;
+function startRounds() {
+  l = setInterval(function () {
+    spawnWave();
+    clearInterval(l);
+  }, 2000);
 }

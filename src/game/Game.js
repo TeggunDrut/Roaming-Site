@@ -11,6 +11,29 @@ function init() {
   }
 }
 
+function gameOver() {
+  // game.style.display = "none";
+  if (fadeOut(0.5)) {
+    let con = document.createElement('div');
+    let title = document.createElement("h2");
+    title.setAttribute(
+      "style",
+      "width: auto; height: 20px; color: white; position: absolute; top:0; left:0; right:0; bottom:0; margin:auto; text-align:center; font-size: 20px;"
+    );
+    title.innerHTML = "Game Over";
+    document.body.appendChild(title);
+    setTimeout(() => { 
+      let sub = document.createElement("h3");
+      sub.setAttribute('style', 'width: auto; height: 20px; color: white; position: absolute; top:100px; left:0; right:0; bottom:0; margin:auto; text-align:center; font-size: 20px;')
+      sub.innerHTML = "Retry?";
+      sub.onclick = () => { 
+        document.location.href = document.location.href;
+      }
+      document.body.appendChild(sub);
+    },1500)
+  }
+}
+
 function loop() {
   if (document.getElementById("fadeDiv").childElementCount < 1)
     document.getElementById("fadeDiv").style.display = "none";
@@ -94,9 +117,6 @@ function gameLoop() {
   }
   ctx.stroke();
 
-  // player update
-  player.update();
-
   ctx.font = "30px Arial";
   ctx.fillStyle = "white";
   ctx.fillText("FPS: " + Math.floor(fps), 10, 30);
@@ -121,9 +141,13 @@ function gameLoop() {
     startRounds();
     roundsStarted = false;
   }
+
+  // player update
+  player.update();
 }
 
 let enemies = [];
+
 function spawnWave() {
   spawnPoints.forEach((s) => {
     let enemy = new Enemy(s.x, s.y, 60, 60, "blue", 200, false, 1, 100);
@@ -135,6 +159,7 @@ function spawnWave() {
     roundNumber++;
   });
 }
+
 let l;
 function startRounds() {
   l = setInterval(function () {

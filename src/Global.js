@@ -83,6 +83,10 @@ document.addEventListener("keydown", (e) => {
     );
   }
 });
+setInterval(() => {
+  if (gameOpen) player.health -= 1;
+}, 1500);
+
 document.addEventListener("keyup", (e) => {
   keyState[e.key] = false;
 });
@@ -107,19 +111,19 @@ document.addEventListener("mousedown", (e) => {
     player.heldGun.currentAmmo--;
     player.shoot(mouseX, mouseY);
     firstShot = false;
-    setTimeout(function () { }, player.heldGun.rpm / 10);
+    setTimeout(function () {}, player.heldGun.rpm / 10);
   }
 
   mouseDown = true;
   fireloop = setInterval(() => {
     if (mouseDown == true && gameOpen) {
-        if (!(player.heldGun.currentAmmo < 1)) {
-          player.shoot(mouseX, mouseY);
-          player.heldGun.currentAmmo--;
+      if (!(player.heldGun.currentAmmo < 1)) {
+        player.shoot(mouseX, mouseY);
+        player.heldGun.currentAmmo--;
       }
       if (bullets.length > 200) {
         bullets.length = 10;
-      }  
+      }
     }
   }, player.heldGun.rpm / 8);
 });
@@ -160,7 +164,8 @@ function getRandomInt(min, max) {
 }
 function fadeOut(seconds) {
   let alpha = 0;
-
+  div.style.display = "inline-block";
+  fadeDiv.appendChild(div);
   setInterval(() => {
     if (alpha < 1) {
       alpha += 0.01 * seconds;
@@ -168,14 +173,16 @@ function fadeOut(seconds) {
         "style",
         `width: 100%; height: 100%;background-color: rgba(0, 0, 0, ${alpha})`
       );
+      
     }
   }, seconds * 10);
-  fadeDiv.appendChild(div);
+
   return true;
 }
 function fadeIn(seconds) {
   let alpha = 1;
-
+  div.style.display = "inline-block";
+  fadeDiv.appendChild(div);
   setInterval(() => {
     if (alpha > 0) {
       alpha -= 0.01 * seconds;

@@ -2,7 +2,7 @@ let looper = 0;
 let animation = false;
 let progress = 0;
 
-let assultRifle = { name: "assult rigle", currentAmmo: 30, maxAmmo: 30, rpm: 1500, damage: 24 };
+let assultRifle = { name: "assault rifle", currentAmmo: 30, maxAmmo: 30, rpm: 1500, damage: 24 };
 let pistol = {name: "pistol", currentAmmo: 7, maxAmmo: 7, rpm: 3000, damage: 39}
 let player = {
   x: 0,
@@ -18,9 +18,10 @@ let player = {
   maxShots: 0,
   rpm: 0,
   reloading: false,
+  killCount: 0,
   shoot: function (mouseX, mouseY) {
 
-    let bullet = new Bullet(this.x, this.y, 2, mouseX, mouseY);
+    let bullet = new Bullet(this, this.x, this.y, 2, mouseX, mouseY);
     var x = mouseX - player.x;
     var y = mouseY - player.y;
     var l = Math.sqrt(x * x + y * y);
@@ -38,6 +39,14 @@ let player = {
     bullets.push(bullet);
   },
   update: function () {
+
+    if(this.health <= 0) {
+      this.health = 1;
+      gameOpen = false;
+      gameLoop = 0;
+      gameOver();
+    }
+
     ctx.fillStyle = "black";
     ctx.fillRect(this.x, this.y, this.width, this.height);
 
@@ -67,7 +76,6 @@ let player = {
     bullets.forEach((b) => {
       b.loop();
     });
-    drawUI();
     if (keyState.r == true && player.heldGun.currentAmmo < this.heldGun.maxAmmo) {
       if (this.heldGun.currentAmmo == this.heldGun.maxAmmo) {
         
@@ -100,5 +108,7 @@ let player = {
     } else {
       animation = false;
     }
+    
+    drawUI();
   },
 };

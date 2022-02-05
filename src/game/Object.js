@@ -1,5 +1,6 @@
 class Bullet {
-  constructor(x, y, speed, mouseX, mouseY) {
+  constructor(sender, x, y, speed, mouseX, mouseY) {
+    this.sender = sender;
     this.x = x;
     this.y = y;
     this.velX = 0;
@@ -10,14 +11,14 @@ class Bullet {
     this.mouseY = mouseY;
   }
   destroy() {
-    for(let i = 0; i < bullets.length; i++) {
-      if(bullets[i].x == this.x) {
+    for (let i = 0; i < bullets.length; i++) {
+      if (bullets[i].x == this.x) {
         bullets.splice(i, 1);
       }
     }
   }
   loop() {
-    
+
     this.x += this.velX;
     this.y += this.velY;
 
@@ -29,6 +30,11 @@ class Bullet {
         this.y >= e.y
       ) {
         e.currentHealth -= player.heldGun.damage;
+        if (e.currentHealth <= 0) {
+          this.sender.killCount++;
+          player.health += 5;
+        }
+          
         this.destroy();
       }
     });
@@ -89,13 +95,15 @@ class Enemy extends Entity {
     this.maxHealth = maxHealth;
 
     this.currentHealth = this.maxHealth;
+    this.attackDmg = 10;
+    this.attackSpeed = 1500;
   }
   destroy() {
-    for(let i = 0; i < enemyList.length; i++) {
-      if(enemyList[i].x == this.x) {
+    for (let i = 0; i < enemyList.length; i++) {
+      if (enemyList[i].x == this.x) {
         enemyList.splice(i, 1);
       }
-    }    
+    }
   }
   draw() {
     // if (this.drawViewDistance) {
@@ -148,6 +156,8 @@ class Enemy extends Entity {
         this.y += this.maxSpeed;
       }
     }
+
+    
     if (this.drawViewDistance) {
       ctx.beginPath();
       ctx.strokeStyle = "red";
@@ -191,6 +201,7 @@ class Enemy extends Entity {
     }
   }
   update() {
+    
     if (this.currentHealth <= 0) {
       this.destroy();
     }
@@ -198,3 +209,4 @@ class Enemy extends Entity {
     this.targetPlayer();
   }
 }
+

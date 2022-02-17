@@ -1,8 +1,25 @@
+class Upgrade {
+  constructor(name) {
+    this.name = name;
+  }
+}
+class Ability {
+  constructor(name, x, y, w, h, c) {
+    this.name = name;
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    this.c = c;
+  }
+}
 class Bullet {
   constructor(sender, x, y, speed, mouseX, mouseY) {
     this.sender = sender;
     this.x = x;
     this.y = y;
+    this.w = 2;
+    this.h = 2;
     this.velX = 0;
     this.velY = 0;
     this.size = 4;
@@ -23,11 +40,7 @@ class Bullet {
     this.y += this.velY;
 
     enemyList.forEach((e) => {
-      if (
-        this.x <= e.x + e.width &&
-        this.x >= e.x &&
-        this.y <= e.y + e.height &&
-        this.y >= e.y
+      if (getRectanglesCollided(this, e)
       ) {
         e.currentHealth -= player.heldGun.damage;
         if (e.currentHealth <= 0) {
@@ -47,6 +60,12 @@ class Bullet {
     ) {
       this.destroy();
     }
+    WorldObjects.forEach(o => {
+      if (getRectanglesCollided(this, o)) {
+        this.destroy();
+      }
+    })
+    
 
     ctx.fillStyle = "yellow";
     ctx.fillRect(this.x, this.y, this.size, this.size);
@@ -65,8 +84,8 @@ class Enemy extends Entity {
   constructor(
     x,
     y,
-    width,
-    height,
+    w,
+    h,
     color,
     viewDistance,
     drawViewDistance,
@@ -76,8 +95,8 @@ class Enemy extends Entity {
     super(
       x,
       y,
-      width,
-      height,
+      w,
+      h,
       color,
       viewDistance,
       drawViewDistance,
@@ -86,8 +105,8 @@ class Enemy extends Entity {
     );
     this.x = x;
     this.y = y;
-    this.width = width;
-    this.height = height;
+    this.w = w;
+    this.h = h;
     this.color = color;
     this.viewDistance = viewDistance;
     this.drawViewDistance = drawViewDistance;
@@ -99,9 +118,17 @@ class Enemy extends Entity {
     this.attackSpeed = 1500;
   }
   destroy() {
+    let r = Math.floor(Math.random() * 10);
+    let abil = abilities[Math.floor(Math.random() * abilities.length)];
+    // if (r == 3) {
+    //   let a = new Ability(abil.name, this.x + this.width / 3, this.y + this.height / 3, 30, 30, abil.color)
+    //   abilitiesOnGround.push(a);
+    // }
+    
     for (let i = 0; i < enemyList.length; i++) {
       if (enemyList[i].x == this.x) {
         enemyList.splice(i, 1);
+        enemyList.push(new Enemy(60 + (Math.random() * game.width - 60), 60 + (Math.random() * game.height - 60), 60, 60, "blue", 200, false, 1, 100))
       }
     }
   }
@@ -116,22 +143,22 @@ class Enemy extends Entity {
     // ctx.beginPath();
     ctx.fillStyle = this.color;
     // ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-    ctx.rect(this.x, this.y, this.width, this.height);
+    ctx.rect(this.x, this.y, this.w, this.h);
     ctx.fill();
 
     if (!(this.health <= 0)) {
       ctx.fillStyle = "red";
       ctx.fillRect(
-        this.x - this.width + 25,
-        this.y - this.height + 25,
-        this.width * 2 + 25 / 2,
+        this.x - this.w + 25,
+        this.y - this.h + 25,
+        this.w * 2 + 25 / 2,
         25
       );
       ctx.fillStyle = "green";
       ctx.fillRect(
-        this.x - this.width + 25,
-        this.y - this.height + 25,
-        this.width * 2 + 25 / 2 - (this.maxHealth - this.currentHealth),
+        this.x - this.w + 25,
+        this.y - this.h + 25,
+        this.w * 2 + 25 / 2 - (this.maxHealth - this.currentHealth),
         25
       );
     } else {
@@ -140,23 +167,44 @@ class Enemy extends Entity {
   }
   targetPlayer() {
     if (
-      player.x + player.width >= this.x - this.width - this.viewDistance &&
-      player.x <= this.x + this.width + this.viewDistance &&
-      player.y + player.height >= this.y - this.height - this.viewDistance &&
-      player.y <= this.y + this.height + this.viewDistance
+      player.x + player.w >= this.x - this.w - this.viewDistance &&
+      player.x <= this.x + this.w + this.viewDistance &&
+      player.y + player.h >= this.y - this.h - this.viewDistance &&
+      player.y <= this.y + this.h + this.viewDistance
     ) {
-      if (player.x + player.width <= this.x) {
+      if (player.x + player.w <= this.x) {
         this.x -= this.maxSpeed;
       } else if (player.x > this.x) {
         this.x += this.maxSpeed;
       }
-      if (player.y + player.height <= this.y) {
+      if (player.y + player.h <= this.y) {
         this.y -= this.maxSpeed;
       } else if (player.y > this.y) {
         this.y += this.maxSpeed;
       }
     }
 
+    if (this.x <= player.x + player.w && player.x >= player.x && this.y <= player.y + player.h && this.y >= player.y) {
+      player.health -= 0.1;
+    }
+
+    WorldObjects.forEach((o) => {
+
+      if (this.x <= o.x + o.w && this.x >= o.x - this.w && this.y + this.h >= o.y && this.y < o.y && this.y < o.y) {
+        this.y = o.y - this.h;
+      }
+      if (this.x <= o.x + o.w && this.x >= o.x - this.w && this.y <= o.y + o.h && this.y > o.y && this.y+ this.h > o.y + o.h) {
+        this.y = o.y + o.h;
+      }
+    
+      if (this.y <= o.y + o.h && this.y >= o.y && this.x + this.w >= o.x && this.x < o.x) {
+        this.x = o.x - this.w;
+      }
+      if (this.y <= o.y + o.h && this.y >= o.y && this.x <= o.x + o.w && this.x + this.w > o.x + o.w) {
+        this.x = o.x + o.w;
+      }
+      
+    });
     
     if (this.drawViewDistance) {
       ctx.beginPath();

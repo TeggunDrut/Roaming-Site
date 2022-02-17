@@ -8,9 +8,11 @@ window.onresize = () => {
   game.height = window.innerHeight;
 
   console.log(game.width, game.height);
-}
-
+};
+document.body.style.cursor = "none";
+// startGame();
 mainmenuBtnPlay.onclick = () => {
+  document.body.style.cursor = "none";
   startGame();
   // if (fadeOut(1)) {
   //   let title = document.createElement("h2");
@@ -23,14 +25,14 @@ mainmenuBtnPlay.onclick = () => {
   //   title.innerHTML = "Get Ready...";
   //   alert(title.style.width, title.style.height);
   //   setTimeout(() => {
-      
+
   //     document.body.appendChild(title);
   //     setTimeout(()=>{
   //       title.style.display = "none";
   //       fadeIn(2);
   //       startGame();
   //     }, 2000)
-      
+
   //   }, 1500);
   // }
 };

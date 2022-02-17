@@ -14,7 +14,7 @@ function init() {
 function gameOver() {
   // game.style.display = "none";
   if (fadeOut(0.5)) {
-    let con = document.createElement('div');
+    let con = document.createElement("div");
     let title = document.createElement("h2");
     title.setAttribute(
       "style",
@@ -22,15 +22,18 @@ function gameOver() {
     );
     title.innerHTML = "Game Over";
     document.body.appendChild(title);
-    setTimeout(() => { 
+    setTimeout(() => {
       let sub = document.createElement("h3");
-      sub.setAttribute('style', 'width: auto; height: 20px; color: white; position: absolute; top:100px; left:0; right:0; bottom:0; margin:auto; text-align:center; font-size: 20px;')
+      sub.setAttribute(
+        "style",
+        "width: auto; height: 20px; color: white; position: absolute; top:100px; left:0; right:0; bottom:0; margin:auto; text-align:center; font-size: 20px;"
+      );
       sub.innerHTML = "Retry?";
-      sub.onclick = () => { 
+      sub.onclick = () => {
         document.location.href = document.location.href;
-      }
+      };
       document.body.appendChild(sub);
-    },1500)
+    }, 1500);
   }
 }
 
@@ -86,19 +89,7 @@ function startGame() {
   // fadeDiv.removeChild(div);
   setInterval(gameLoop, 1);
 }
-var lastCalledTime;
-var fps;
 function gameLoop() {
-  if (!lastCalledTime) {
-    lastCalledTime = Date.now();
-    fps = 0;
-    return;
-  }
-  delta = (Date.now() - lastCalledTime) / 1000;
-  lastCalledTime = Date.now();
-  fps = 1 / delta;
-
-  // draw background
   ctx.clearRect(0, 0, game.width, game.height);
   ctx.fillStyle = "rgba(90, 90, 90, 0.6)";
   ctx.fillRect(0, 0, game.width, game.height);
@@ -106,12 +97,12 @@ function gameLoop() {
   ctx.beginPath();
   ctx.strokeStyle = "rgba(95, 95, 95, 0.9)";
   for (let xOff = 0; xOff < game.width; xOff += 70) {
-    ctx.moveTo(xOff, 0);
-    ctx.lineTo(xOff, game.height);
+    ctx.moveTo( xOff, 0);
+    ctx.lineTo( xOff, game.height);
     ctx.stroke();
   }
   for (let yOff = 0; yOff < game.height; yOff += 70) {
-    ctx.moveTo(0, yOff);
+    ctx.moveTo(0,  yOff);
     ctx.lineTo(game.width, yOff);
     ctx.stroke();
   }
@@ -120,33 +111,42 @@ function gameLoop() {
   ctx.font = "30px Arial";
   ctx.fillStyle = "white";
   ctx.fillText("FPS: " + Math.floor(fps), 10, 30);
+  ctx.fillText("FPS Cap: " + fpsCap, 10, 70);
 
-  // let i = 0;
-  // setInterval(() => {
-  //   i++;
-  //   if (i != 2 && firing == false) {
-
-  //     firing = true;
-  //   }
-  // }, player.rpm)
-  // return false;
-  // if (wait(1)) {
-  //   player.shoot(mouseX, mouseY);
-  //   alert(1);
-  // }
   enemyList.forEach((e) => {
     e.update();
   });
   if (roundsStarted) {
+    roundInProgress = true;
     startRounds();
     roundsStarted = false;
   }
 
+  abilitiesOnGround.forEach((a) => {
+    ctx.fillStyle = a.c;
+    ctx.fillRect(a.x, a.y, 30, 30);
+  });
+
+  // draw walls
+  WorldObjects.forEach((o) => {
+    o.update();
+  });
+
+  if (buyMenu.open == true) {
+    buyMenu.update();
+  }
+
+  if (player.health > 199) {
+    alert("You Win!");
+  }
+
   // player update
   player.update();
+  refreshLoop();
 }
 
 let enemies = [];
+let l;
 
 function spawnWave() {
   spawnPoints.forEach((s) => {
@@ -157,13 +157,13 @@ function spawnWave() {
     }
     enemies = [];
     roundNumber++;
+    clearInterval(l);
   });
 }
 
-let l;
 function startRounds() {
   l = setInterval(function () {
     spawnWave();
-    clearInterval(l);
+    console.log(roundsStarted);
   }, 2000);
 }

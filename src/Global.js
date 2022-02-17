@@ -24,23 +24,44 @@ document.body.appendChild(game);
 const ctx = game.getContext("2d");
 
 let gameOpen = false;
+let menuOpen = false;
+
+let lastCalledTime;
+let fps;
+let fpsCap = 300;
 
 let roundsStarted = false;
 let roundNumber = 1;
+let roundInProgress = false;
+
+let gameMap = [{ name: "spawn" }, { name: "enemiespawns" }, { name: "other" }];
 
 let spawnPoints = [
   { x: 100, y: 700 },
   { x: 450, y: 150 },
   { x: 1300, y: 850 },
   { x: 1100, y: 200 },
-  { x: 1560, y: 170 },
+  // { x: 1560, y: 170 },
+];
+let abilitiesOnGround = [];
+let abilities = [
+  { name: "Ricochet", color: "red" },
+  { name: "Faster RPM", color: "green" },
+  { name: "Faster Speed", color: "purple" },
+  { name: "Multi Shot", color: "gray" },
 ];
 
 let fireloop;
-
 let firing = false;
-
 let bullets = [];
+let godMode = false;
+
+let WorldObjects = [];
+
+WorldObjects.push(new Wall(200, 200, 100, 100, "red"));
+WorldObjects.push(new Wall(600, 540, 100, 100, "red"));
+WorldObjects.push(new Wall(100, 400, 100, 100, "red"));
+WorldObjects.push(new Wall(400, 600, 100, 100, "red"));
 
 let keyState = {
   a: false,
@@ -60,12 +81,37 @@ let check = setInterval(() => {
 }, 10);
 
 let firstShot = true;
+let switchingGun = false;
 
+let tempLoop;
 // events
 document.addEventListener("keydown", (e) => {
   keyState[e.key] = true;
+  if (e.key == "Escape") {
+    if (menuOpen) {
+      buyMenu.open = false;
+      menuOpen = false;
+    }
+  }
+  if (e.key == "b") {
+    menuOpen = !menuOpen;
+    buyMenu.open = !buyMenu.open;
+  }
+  if (e.key == "Backspace") {
+    enemyList.length = 1;
+  }
+  if (e.key == "1") {
+    mouseDown = false;
+    player.heldGun = player.primaryGun;
+  } else if (e.key == "2") {
+    mouseDown = false;
+    player.heldGun = player.secondaryGun;
+  }
+  if (e.key == "`" || e.key == "~") {
+    godMode = !godMode;
+  }
   if (e.key == "Enter") {
-    roundsStarted = true;
+    if (!roundInProgress) roundsStarted = true;
   }
   if (e.key == "l") {
     enemyList.push(
@@ -89,43 +135,16 @@ setInterval(() => {
 
 document.addEventListener("keyup", (e) => {
   keyState[e.key] = false;
+  tempLoop = 0;
 });
 document.addEventListener("mousemove", (e) => {
   mouseX = e.clientX;
   mouseY = e.clientY;
 });
-let iasdsa = 0;
+let availableShoot = true;
 document.addEventListener("mousedown", (e) => {
-  iasdsa++;
-  console.log(`iasds`, iasdsa);
-  if (player.heldGun == "pistol") {
-    player.rpm = 1500;
-    player.maxShots = 7;
-    player.damage = 34;
-  } else if (player.heldGun == "assult rifle") {
-    player.rpm = 150;
-    player.maxShots = 30;
-    player.damage = 28;
-  }
-  if (firstShot && player.heldGun.currentAmmo != 0) {
-    player.heldGun.currentAmmo--;
-    player.shoot(mouseX, mouseY);
-    firstShot = false;
-    setTimeout(function () {}, player.heldGun.rpm / 10);
-  }
-
-  mouseDown = true;
-  fireloop = setInterval(() => {
-    if (mouseDown == true && gameOpen) {
-      if (!(player.heldGun.currentAmmo < 1)) {
-        player.shoot(mouseX, mouseY);
-        player.heldGun.currentAmmo--;
-      }
-      if (bullets.length > 200) {
-        bullets.length = 10;
-      }
-    }
-  }, player.heldGun.rpm / 8);
+  console.log(`availableShoot`, availableShoot);
+  
 });
 document.addEventListener("mouseup", (e) => {
   mouseDown = false;
@@ -173,7 +192,6 @@ function fadeOut(seconds) {
         "style",
         `width: 100%; height: 100%;background-color: rgba(0, 0, 0, ${alpha})`
       );
-      
     }
   }, seconds * 10);
 
